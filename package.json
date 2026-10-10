@@ -1,0 +1,17 @@
+{
+  "name": "sbsb-demo-db",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SBSB DB 자동 설정 테스트 앱: 방문 수는 Postgres, 최근 방문 버전은 Redis에 저장 (재배포·롤백해도 유지)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "pg": "8.23.0",
+    "redis": "6.3.0"
+  }
+}
