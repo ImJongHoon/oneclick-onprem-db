@@ -1,26 +1,26 @@
 FROM node:20-bookworm-slim
 
-# Create app user and directory
-ENV NODE_ENV=production \
-    PORT=8000
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
-# Create non-root user
-RUN groupadd --gid 1000 app && useradd --uid 1000 --gid app --shell /usr/sbin/nologin --create-home app
+# Use production Node env
+ENV NODE_ENV=production
+ENV PORT=8000
 
-# Install dependencies deterministically using package-lock.json
-# Copy manifest files first to leverage layer caching
-COPY --chown=app:app package.json package-lock.json ./
+# Copy dependency manifests first for deterministic installs
+COPY package.json package-lock.json ./
 
-# Install production dependencies only
-RUN npm ci --omit=dev
+# Install production dependencies deterministically
+RUN npm ci --omit=dev --prefer-offline --no-audit
 
 # Copy application source
-COPY --chown=app:app . .
+COPY --chown=node:node . .
 
-# Use non-root user
-USER app
+# Use non-root user provided by official image when possible
+USER node
 
-# Expose the application's port and run
+# Expose the port the app listens on
 EXPOSE 8000
+
+# Start the app
 CMD ["node", "server.js"]
