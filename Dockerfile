@@ -1,26 +1,25 @@
-FROM node:20-bookworm-slim
+FROM node:20-slim
 
-# Set working directory
-WORKDIR /usr/src/app
+# Create app directory and use a non-root user
+WORKDIR /home/node/app
+RUN chown node:node /home/node/app
 
-# Use production Node env
+# Copy package files first to leverage Docker cache and enable deterministic installs
+COPY --chown=node:node package.json package-lock.json ./
+
 ENV NODE_ENV=production
 ENV PORT=8000
 
-# Copy dependency manifests first for deterministic installs
-COPY package.json package-lock.json ./
-
-# Install production dependencies deterministically
-RUN npm ci --omit=dev --prefer-offline --no-audit
+# Install only production dependencies, deterministic install using npm ci
+RUN npm ci --omit=dev --no-audit --no-fund
 
 # Copy application source
 COPY --chown=node:node . .
 
-# Use non-root user provided by official image when possible
+# Use non-root user
 USER node
 
-# Expose the port the app listens on
+# Expose the port the app binds to and ensure server listens on 0.0.0.0 (app uses PORT env)
 EXPOSE 8000
 
-# Start the app
 CMD ["node", "server.js"]
